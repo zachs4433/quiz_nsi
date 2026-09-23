@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Python Pro - Dark Mode</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #8b5cf6; 
+            --primary-hover: #7c3aed;
+            --success: #10b981; 
+            --danger: #ef4444;  
+            --bg-color: #0f172a; 
+            --card-bg: #1e293b;  
+            --card-border: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --font-ui: 'Poppins', sans-serif;
+            --font-code: 'Fira Code', monospace;
+        }
+
+        body {
+            font-family: var(--font-ui);
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at top right, #1e1b4b, #0f172a);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            width: 100%;
+            max-width: 650px;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        h2 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-top: 0;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #a78bfa, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.info { color: var(--text-muted); font-size: 15px; margin-bottom: 15px; }
+
+        /* Catégories & Modes (Chips) */
+        .chips-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+
+        .chip {
+            background-color: #334155;
+            color: var(--text-main);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .chip.active {
+            background-color: rgba(139, 92, 246, 0.2);
+            border-color: var(--primary);
+            color: #c4b5fd;
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
+        }
+
+        .mode-chip.active {
+            background-color: rgba(16, 185, 129, 0.2);
+            border-color: var(--success);
+            color: #34d399;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Boutons principaux */
+        .btn-main {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
+            margin-top: 10px;
+        }
+
+        .btn-main:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.6);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            border: 2px solid var(--card-border);
+            color: var(--text-muted);
+            box-shadow: none;
+            margin-top: 15px;
+        }
+
+        .btn-secondary:hover {
+            background-color: #334155;
+            color: var(--text-main);
+            box-shadow: none;
+        }
+
+        /* Barre de progression */
+        .progress-container {
+            width: 100%;
+            background-color: #334155;
+            border-radius: 10px;
+            height: 6px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--primary);
+            width: 0%;
+            transition: width 0.4s ease;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        /* Affichage du mot */
+        #word-display {
+            font-size: 24px;
+            font-weight: 600;
+            margin: 30px 0;
+            color: #fff;
+            background: #0f172a;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+            word-wrap: break-word;
+            transition: all 0.3s ease;
+        }
+
+        /* Choix du quiz */
+        .choice-btn {
+            display: block;
+            width: 100%;
+            background-color: #1e293b;
+            color: var(--text-main);
+            border: 1px solid var(--card-border);
+            margin: 12px 0;
+            padding: 16px;
+            font-size: 15px;
+            font-weight: 500;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .choice-btn:hover:not(:disabled) {
+            border-color: var(--primary);
+            background-color: #2dd4bf15;
+            transform: translateY(-2px);
+        }
+
+        .correct {
+            background-color: rgba(16, 185, 129, 0.2) !important;
+            border-color: var(--success) !important;
+            color: #34d399 !important;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .wrong {
+            background-color: rgba(239, 68, 68, 0.2) !important;
+            border-color: var(--danger) !important;
+            color: #f87171 !important;
+        }
+
+        /* Écran de résultats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+            background: #0f172a;
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid var(--card-border);
+        }
+
+        .stat-box h4 { margin: 0 0 5px 0; color: var(--text-muted); font-size: 13px; text-transform: uppercase;}
+        .stat-box p { margin: 0; font-size: 24px; font-weight: 700; color: #fff;}
+
+        /* Anneau de score */
+        .score-ring {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            background: conic-gradient(var(--primary) 0%, #334155 0%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px auto;
+            position: relative;
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.2);
+        }
+        .score-ring::before {
+            content: "";
+            position: absolute;
+            inset: 8px;
+            background: var(--card-bg);
+            border-radius: 50%;
+        }
+        .score-value {
+            position: relative;
+            z-index: 1;
+            font-size: 32px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        /* Graphique */
+        .graph-container {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 4px;
+            height: 80px;
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px dashed var(--card-border);
+        }
+        .graph-bar {
+            flex-grow: 1;
+            max-width: 25px;
+            min-height: 5px;
+            border-radius: 4px 4px 0 0;
+            transition: height 1s ease-out;
+            opacity: 0.8;
+        }
+        .bar-correct { background-color: var(--success); }
+        .bar-wrong { background-color: var(--danger); }
+
+        .hidden { display: none !important; }
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .divider {
+            height: 1px;
+            background: var(--card-border);
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- PAGE 1 : CONFIGURATION -->
+    <div id="page-config" class="fade-in">
+        <h2>Terminal Quiz</h2>
+        
+        <p class="info">1. Sélectionnez les catégories :</p>
+        <div id="categories-container" class="chips-container">
+            <!-- Puces de catégories générées par JS -->
+        </div>
+
+        <div class="divider"></div>
+
+        <p class="info">2. Choisissez le mode de jeu :</p>
+        <div class="chips-container">
+            <div class="chip mode-chip active" onclick="setMode('normal', this)">Normal (Code ➔ Déf)</div>
+            <div class="chip mode-chip" onclick="setMode('reverse', this)">Inversé (Déf ➔ Code)</div>
+            <div class="chip mode-chip" onclick="setMode('mixed', this)">Aléatoire (Mélange)</div>
+        </div>
+
+        <button class="btn-main" onclick="startQuiz()">INITIALISER LA SESSION >_</button>
+    </div>
+
+    <!-- PAGE 2 : LE QUIZ -->
+    <div id="page-quiz" class="hidden">
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <p class="info" id="progress-text" style="margin-bottom: 10px;">Exécution 1 / 10</p>
+        
+        <div id="word-display" class="fade-in">Mot ici</div>
+        
+        <div id="choices-container">
+            <!-- Boutons générés en JS -->
+        </div>
+        
+        <button id="next-btn" class="btn-main hidden" style="margin-top:20px;" onclick="nextQuestion()">SUIVANT >></button>
+    </div>
+
+    <!-- PAGE 3 : RÉSULTATS -->
+    <div id="page-result" class="hidden">
+        <h2>Session Terminée</h2>
+        
+        <div class="score-ring" id="score-ring">
+            <div class="score-value" id="score-display">0%</div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-box">
+                <h4>Temps moyen</h4>
+                <p id="avg-time">0.0s</p>
+            </div>
+            <div class="stat-box">
+                <h4>Précision</h4>
+                <p id="accuracy-text">0/0</p>
+            </div>
+            <div style="grid-column: span 2;">
+                <h4>Historique (Hauteur = Temps de réponse)</h4>
+                <div class="graph-container" id="stats-graph">
+                    <!-- Graphique généré en JS -->
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-main" onclick="replayQuiz()">RELANCER ()</button>
+        <button class="btn-main btn-secondary" onclick="modifyList()">RETOURNER AU MENU</button>
+    </div>
+
+</div>
+
+<script>
+    /* ==========================================
+       === BASE DE DONNÉES DU VOCABULAIRE ===
+       ========================================== */
+    const VOCABULARY_DB = [
+        // Définitions (1-4)
+        { category: "Définitions", word: "Itérable", answer: "Peut être utilisé dans une boucle 'for v in iterable:'" },
+        { category: "Définitions", word: "Indexable", answer: "On peut accéder aux éléments avec la syntaxe 'indexable[...]'" },
+        { category: "Définitions", word: "Immutable", answer: "Non modifiable après création" },
+        { category: "Définitions", word: "Mutable", answer: "Modifiable après création" },
+        // Boucles (5-9)
+        { category: "Boucles", word: "while condition:", answer: "Tant que 'condition' est vraie, faire..." },
+        { category: "Boucles", word: "for i in range(len(iterable)):", answer: "Pour tous les indices i de iterable, faire..." },
+        { category: "Boucles", word: "for v in iterable:", answer: "Pour toutes les valeurs de iterable, faire..." },
+        { category: "Boucles", word: "continue", answer: "Passe à l'itération suivante sans exécuter la suite de la boucle" },
+        { category: "Boucles", word: "break", answer: "Interrompt la boucle et passe au code après celle-ci" },
+        // Conditions (10-12)
+        { category: "Conditions", word: "if boolean:", answer: "Si boolean est vrai, alors: ..." },
+        { category: "Conditions", word: "elif boolean:", answer: "Ou si boolean est vrai, alors: ..." },
+        { category: "Conditions", word: "else:", answer: "Sinon: ..." },
+        // Divers (13-20)
+        { category: "Divers", word: "def f_name(...):", answer: "Déclarer la fonction f_name avec les arguments (...)" },
+        { category: "Divers", word: "def ... (a=valeur):", answer: "Déclarer une fonction avec un argument 'a' avec une valeur par défaut" },
+        { category: "Divers", word: "return ...", answer: "Sort de la fonction en renvoyant ... (le reste de la fonction n'est pas exécuté)" },
+        { category: "Divers", word: "print(...)", answer: "Affiche ... dans la console" },
+        { category: "Divers", word: "len(iterable)", answer: "Donne la taille d'un itérable" },
+        { category: "Divers", word: "sorted(iterable)", answer: "Renvoie une nouvelle liste avec le contenu d'iterable trié en ordre naturel" },
+        { category: "Divers", word: "raise TypeError(msg)", answer: "Lève TypeError, avec le message msg" },
+        { category: "Divers", word: "assert condition, msg", answer: "Lève AssertionError(msg) si la condition est fausse" },
+        // Listes (21-31)
+        { category: "Listes", word: "[] ou list()", answer: "Créer une liste vide" },
+        { category: "Listes", word: "[val, ...]", answer: "Créer une liste avec des valeurs" },
+        { category: "Listes", word: "list(iterable)", answer: "Transformer un itérable en liste" },
+        { category: "Listes", word: "lst[i]", answer: "Récupérer l'élément à l'indice i d'une liste" },
+        { category: "Listes", word: "lst[i] = v", answer: "Modifier l'élément à l'indice i de lst avec la valeur v" },
+        { category: "Listes", word: "lst.append(valeur)", answer: "Ajouter une valeur à la fin d'une liste" },
+        { category: "Listes", word: "lst.pop()", answer: "Supprimer le dernier élément d'une liste et renvoyer sa valeur" },
+        { category: "Listes", word: "valeur in lst", answer: "Tester si valeur est présente dans une liste" },
+        { category: "Listes", word: "lst1 + lst2", answer: "Concaténer 2 listes en une plus grande (crée une nouvelle liste)" },
+        { category: "Listes", word: "lst[:] ou list(lst)", answer: "Créer une copie de lst" },
+        { category: "Listes", word: "lst[a:b]", answer: "Créer une copie de l'indice a (inclus) à l'indice b (exclu) d'une liste" },
+        // Dicts
+        { category: "Dicts", word: "{} ou dict()", answer: "créer un dictionnaire vide" },
+        { category: "Dicts", word: "{key: val, ...}", answer: "créer un dictionnaire avec des valeurs" },
+        { category: "Dicts", word: "dct[k]", answer: "accéder à la valeur associée à une clef de dictionnaire" },
+        { category: "Dicts", word: "dct[k] = v", answer: "remplacer la valeur associée à une clef ou ajouter un nouvel item au dictionnaire" },
+        { category: "Dicts", word: "dct.keys()", answer: "accéder à toutes les clefs d'un dictionnaire" },
+        { category: "Dicts", word: "dct.values()", answer: "accéder à toutes les valeurs d'un dictionnaire" },
+        { category: "Dicts", word: "dct.items()", answer: "accéder à tous les items (clef,valeur) d'un dictionnaire" },
+        { category: "Dicts", word: "k in dct", answer: "tester si une clef est présente dans le dictionnaire" },
+        { category: "Dicts", word: "dict(dct)", answer: "créer une copie d'un dictionnaire" },
+        // Ranges
+        { category: "Ranges", word: "range(n)", answer: "générer les entiers/indices de 0 (inclus) à n (exclu)" },
+        { category: "Ranges", word: "range(a,b)", answer: "générer les entiers de a (inclus) à b (exclu)" },
+        { category: "Ranges", word: "range(a,b,s)", answer: "générer les entiers de a (inclus) à b (exclu), avec un pas de s entre les valeurs" },
+        // Tuples
+        { category: "Tuples", word: "() ou tuple()", answer: "créer un tuple vide" },
+        { category: "Tuples", word: "(x, ...)", answer: "créer un tuple avec des valeurs" },
+        { category: "Tuples", word: "(x,)", answer: "créer un tuple d'un seul élément" },
+        { category: "Tuples", word: "tuple(iterable)", answer: "transformer un itérable en tuple" },
+        { category: "Tuples", word: "tup[i]", answer: "récupérer l'élément à l'indice i d'un tuple" },
+        { category: "Tuples", word: "valeur in tup", answer: "tester si valeur est présente dans un tuple" },
+        { category: "Tuples", word: "tup1 + tup2", answer: "concaténer 2 tuples en un plus grand (crée un nouveau tuple)" },
+        { category: "Tuples", word: "tup[:] ou tuple(tup)", answer: "créer une copie de tup" },
+        { category: "Tuples", word: "tup[a:b]", answer: "créer une copie de l'indice a (inclus) à l'indice b (exclu) d'un tuple" },
+        // Strings
+        { category: "Strings", word: '"..." ou """...""" ou \'...\'', answer: "définir une chaîne de caractères" },
+        { category: "Strings", word: "s[i]", answer: "récupérer le caractère à l'indice i d'une chaîne de caractères" },
+        { category: "Strings", word: '"..." in s', answer: "tester si un chaîne est présente dans une chaîne de caractères" },
+        { category: "Strings", word: "s[a:b]", answer: "créer une copie de l'indice a (inclus) à l'indice b (exclu) d'une chaîne de caractères" },
+        { category: "Strings", word: "s1 + s2", answer: "assembler deux chaînes de caractères" },
+        // Sets
+        { category: "Sets", word: "set()", answer: "créer un set vide" },
+        { category: "Sets", word: "set(iterable)", answer: "créer un nouveau set à partir d'un autre itérable" },
+        { category: "Sets", word: "my_set.add(v)", answer: "ajouter un élément à un set" },
+        { category: "Sets", word: "my_set.remove(v)", answer: "supprimer un élément d'un set" },
+        { category: "Sets", word: "valeur in my_set", answer: "tester si un élément est présent dans un set" }
+    ];
+
+    // Variables globales
+    let activeDictionary = [];
+    let allGlobalAnswers = []; 
+    let allGlobalWords = []; 
+    let questionsSequence = [];
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let currentMode = 'normal'; // normal, reverse, mixed
+    
+    // Suivi des performances
+    let questionStartTime = 0;
+    let sessionResults = []; 
+
+    // Initialisation
+    document.addEventListener("DOMContentLoaded", () => {
+        allGlobalAnswers = [...new Set(VOCABULARY_DB.map(item => item.answer))];
+        allGlobalWords = [...new Set(VOCABULARY_DB.map(item => item.word))];
+        generateCategoryChips();
+    });
+
+    function generateCategoryChips() {
+        const container = document.getElementById('categories-container');
+        const categories = [...new Set(VOCABULARY_DB.map(item => item.category))];
+        
+        categories.forEach(cat => {
+            const chip = document.createElement('div');
+            chip.className = 'chip category-chip active';
+            chip.innerText = cat;
+            chip.onclick = () => chip.classList.toggle('active');
+            container.appendChild(chip);
+        });
+    }
+
+    // Gérer la sélection du mode
+    function setMode(mode, el) {
+        currentMode = mode;
+        document.querySelectorAll('.mode-chip').forEach(chip => chip.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    function shuffleArray(array) {
+        let currentIndex = array.length, randomIndex;
+        while (currentIndex !== 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+            [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+        }
+        return array;
+    }
+
+    function switchPage(hideId, showId) {
+        document.getElementById(hideId).classList.add('hidden');
+        const showEl = document.getElementById(showId);
+        showEl.classList.remove('hidden');
+        showEl.classList.remove('fade-in');
+        void showEl.offsetWidth; 
+        showEl.classList.add('fade-in');
+    }
+
+    function startQuiz() {
+        const activeChips = document.querySelectorAll('.category-chip.active');
+        const selectedCategories = Array.from(activeChips).map(chip => chip.innerText);
+
+        if (selectedCategories.length === 0) {
+            alert("⚠️ Veuillez sélectionner au moins une catégorie.");
+            return;
+        }
+
+        activeDictionary = VOCABULARY_DB.filter(item => selectedCategories.includes(item.category));
+        switchPage('page-config', 'page-quiz');
+        initGameSession();
+    }
+
+    function initGameSession() {
+        score = 0;
+        currentQuestionIndex = 0;
+        sessionResults = [];
+        
+        questionsSequence = [...activeDictionary];
+        shuffleArray(questionsSequence);
+        showQuestion();
+    }
+
+    function updateProgress() {
+        const progressPercent = (currentQuestionIndex / questionsSequence.length) * 100;
+        document.getElementById('progress-bar').style.width = progressPercent + '%';
+        document.getElementById('progress-text').innerText = `Requête ${currentQuestionIndex + 1} / ${questionsSequence.length}`;
+    }
+
+    function showQuestion() {
+        updateProgress();
+        document.getElementById('next-btn').classList.add('hidden');
+        
+        const currentItem = questionsSequence[currentQuestionIndex];
+        
+        // Définir le mode pour CETTE question
+        let qMode = currentMode;
+        if (qMode === 'mixed') {
+            qMode = Math.random() > 0.5 ? 'normal' : 'reverse';
+        }
+
+        let questionText, correctAnswer, wrongPool;
+
+        if (qMode === 'normal') {
+            questionText = currentItem.word;
+            correctAnswer = currentItem.answer;
+            wrongPool = [...new Set(allGlobalAnswers.filter(ans => ans !== correctAnswer))];
+        } else {
+            // Mode inversé
+            questionText = currentItem.answer;
+            correctAnswer = currentItem.word;
+            wrongPool = [...new Set(allGlobalWords.filter(w => w !== correctAnswer))];
+        }
+        
+        // Adaptation de la police d'affichage selon le mode
+        const wordDisplay = document.getElementById('word-display');
+        wordDisplay.innerText = questionText;
+        if (qMode === 'normal') {
+            wordDisplay.style.fontFamily = 'var(--font-code)';
+            wordDisplay.style.fontSize = '24px';
+        } else {
+            wordDisplay.style.fontFamily = 'var(--font-ui)';
+            wordDisplay.style.fontSize = '20px';
+        }
+        
+        wordDisplay.classList.remove('fade-in');
+        void wordDisplay.offsetWidth;
+        wordDisplay.classList.add('fade-in');
+        
+        // Générer les choix (maximum 2 mauvaises réponses selon la taille disponible)
+        let choices = [correctAnswer]; 
+        shuffleArray(wrongPool);
+        const wrongCount = Math.min(2, wrongPool.length);
+        for (let i = 0; i < wrongCount; i++) {
+            choices.push(wrongPool[i]);
+        }
+        shuffleArray(choices);
+        
+        const container = document.getElementById('choices-container');
+        container.innerHTML = '';
+        
+        choices.forEach((choiceText, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn fade-in';
+            btn.style.animationDelay = (index * 0.1) + 's';
+            
+            // Adaptation de la police des boutons selon le mode
+            if (qMode === 'reverse') {
+                btn.style.fontFamily = 'var(--font-code)';
+                btn.style.fontSize = '16px';
+            } else {
+                btn.style.fontFamily = 'var(--font-ui)';
+                btn.style.fontSize = '15px';
+            }
+
+            btn.innerText = choiceText;
+            btn.onclick = () => checkAnswer(btn, choiceText, correctAnswer);
+            container.appendChild(btn);
+        });
+
+        questionStartTime = Date.now();
+    }
+
+    function checkAnswer(clickedBtn, selectedAnswer, correctAnswer) {
+        const timeTaken = Date.now() - questionStartTime;
+        const isCorrect = (selectedAnswer === correctAnswer);
+
+        sessionResults.push({ correct: isCorrect, time: timeTaken });
+
+        const buttons = document.querySelectorAll('.choice-btn');
+        buttons.forEach(btn => {
+            btn.disabled = true;
+            if (btn.innerText === correctAnswer) {
+                btn.classList.add('correct');
+            }
+        });
+
+        if (isCorrect) {
+            score++;
+        } else {
+            clickedBtn.classList.add('wrong');
+        }
+
+        const nextBtn = document.getElementById('next-btn');
+        nextBtn.classList.remove('hidden');
+        nextBtn.classList.add('fade-in');
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < questionsSequence.length) {
+            showQuestion();
+        } else {
+            endQuiz();
+        }
+    }
+
+    function endQuiz() {
+        document.getElementById('progress-bar').style.width = '100%';
+        
+        setTimeout(() => {
+            switchPage('page-quiz', 'page-result');
+            generateEndStats();
+        }, 300);
+    }
+
+    function generateEndStats() {
+        const total = questionsSequence.length;
+        document.getElementById('accuracy-text').innerText = `${score} / ${total}`;
+        
+        const totalTime = sessionResults.reduce((acc, curr) => acc + curr.time, 0);
+        const avgTime = total > 0 ? (totalTime / total / 1000).toFixed(2) : "0.00";
+        document.getElementById('avg-time').innerText = `${avgTime}s`;
+
+        const percent = total > 0 ? Math.round((score / total) * 100) : 0;
+        let currentPct = 0;
+        const ring = document.getElementById('score-ring');
+        const display = document.getElementById('score-display');
+        
+        const interval = setInterval(() => {
+            if (currentPct >= percent) {
+                clearInterval(interval);
+                ring.style.background = `conic-gradient(var(--primary) ${percent}%, #334155 ${percent}%)`;
+                display.innerText = `${percent}%`;
+            } else {
+                currentPct += 1; 
+                ring.style.background = `conic-gradient(var(--primary) ${currentPct}%, #334155 ${currentPct}%)`;
+                display.innerText = `${currentPct}%`;
+            }
+        }, 15);
+
+        const graphContainer = document.getElementById('stats-graph');
+        graphContainer.innerHTML = '';
+        
+        const maxTime = Math.max(...sessionResults.map(r => r.time), 1000); 
+
+        sessionResults.forEach((res, i) => {
+            const bar = document.createElement('div');
+            bar.className = `graph-bar ${res.correct ? 'bar-correct' : 'bar-wrong'}`;
+            
+            const heightPercent = Math.max((res.time / maxTime) * 100, 10);
+            
+            bar.style.height = '0%';
+            setTimeout(() => {
+                bar.style.height = `${heightPercent}%`;
+            }, 300 + (i * 50)); 
+            
+            bar.title = `Q${i+1} : ${(res.time/1000).toFixed(1)}s`;
+            graphContainer.appendChild(bar);
+        });
+    }
+
+    function replayQuiz() {
+        switchPage('page-result', 'page-quiz');
+        initGameSession();
+    }
+
+    function modifyList() {
+        switchPage('page-result', 'page-config');
+    }
+</script>
+
+</body>
+</html>
